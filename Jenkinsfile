@@ -1,54 +1,36 @@
-node
- {
-  
-  def mavenHome = tool name: "maven3.9.10"
-  
-      echo "GitHub BranhName ${env.BRANCH_NAME}"
-      echo "Jenkins Job Number ${env.BUILD_NUMBER}"
-      echo "Jenkins Node Name ${env.NODE_NAME}"
-  
-      echo "Jenkins Home ${env.JENKINS_HOME}"
-      echo "Jenkins URL ${env.JENKINS_URL}"
-      echo "JOB Name ${env.JOB_NAME}"
-  
-   properties([[$class: 'JiraProjectProperty'], buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '2', daysToKeepStr: '', numToKeepStr: '2')), pipelineTriggers([pollSCM('* * * * *')])])
-  
-  stage("CheckOutCodeGit")
-  {
-   git branch: 'development', credentialsId: '65fb834f-a83b-4fe7-8e11-686245c47a65', url: 'https://github.com/MithunTechnologiesDevOps/maven-web-application.git'
- }
- 
- stage("Build")
- {
- sh "${mavenHome}/bin/mvn clean package"
- }
- 
-  /*
- stage("ExecuteSonarQubeReport")
- {
- sh "${mavenHome}/bin/mvn sonar:sonar"
- }
- 
- stage("UploadArtifactsintoNexus")
- {
- sh "${mavenHome}/bin/mvn deploy"
- }
- 
-  stage("DeployAppTomcat")
- {
-  sshagent(['423b5b58-c0a3-42aa-af6e-f0affe1bad0c']) {
-    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war  ec2-user@15.206.91.239:/opt/apache-tomcat-9.0.34/webapps/" 
-  }
- }
- 
- stage('EmailNotification')
- {
- mail bcc: 'devopstrainingblr@gmail.com', body: '''Build is over
+node {
+    // Define Maven tool location
+    def mavenHome = tool name: "maven3.9.10"
 
- Thanks,
- Mithun Technologies,
- 9980923226.''', cc: 'devopstrainingblr@gmail.com', from: '', replyTo: '', subject: 'Build is over!!', to: 'devopstrainingblr@gmail.com'
- }
- */
- 
- }
+    // Print Jenkins environment info
+    echo "GitHub Branch Name: ${env.BRANCH_NAME}"
+    echo "Jenkins Job Number: ${env.BUILD_NUMBER}"
+    echo "Jenkins Node Name: ${env.NODE_NAME}"
+    echo "Jenkins Home: ${env.JENKINS_HOME}"
+    echo "Jenkins URL: ${env.JENKINS_URL}"
+    echo "Job Name: ${env.JOB_NAME}"
+
+    // Set build properties
+    properties([
+        [$class: 'JiraProjectProperty'],
+        buildDiscarder(logRotator(
+            artifactDaysToKeepStr: '', 
+            artifactNumToKeepStr: '2', 
+            daysToKeepStr: '', 
+            numToKeepStr: '2')
+        ),
+        pipelineTriggers([
+            pollSCM('* * * * *') // Poll every minute (adjust as needed)
+        ])
+    ])
+
+    stage("Checkout Code from Git") {
+        git branch: 'development', 
+            credentialsId: '65fb834f-a83b-4fe7-8e11-686245c47a65', 
+            url: 'https://github.com/MithunTechnologiesDevOps/maven-web-application.git'
+    }
+
+    stage("Build with Maven") {
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+}
